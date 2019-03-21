@@ -1095,8 +1095,8 @@ int main(int argc, char* argv[])
             mr_ = mr[tAntigo][x][y];
             ma_ = ma[tAntigo][x][y];
 
-            newb = (((r_b - l*n_ - lmr*mr_ - lma*ma_)*b_)* gwb[tAntigo][x][y] + D_b*localAverage(b,x,y,wbdif,tAntigo))*deltaT
-            + b[tAntigo][x][y];
+            newb = (((r_b - l*n_ - lmr*mr_ - lma*ma_)*b_)* gwb[tAntigo][x][y] + D_b*localAverage(b,x,y,wbdif,tAntigo)
+            )*deltaT + b[tAntigo][x][y];
             b[tAtual][x][y] = verifyDensity(b[tAtual][x][y]);
 
             //Coa/vWbp pde
