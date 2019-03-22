@@ -1161,8 +1161,7 @@ int main(int argc, char* argv[])
 
             nd[tAtual][x][y] = verifyDensity(nd[tAtual][x][y]);
 
-            dmt[tAtual][x][y] = (b_dmg * b[tAntigo][x][y]
-            + nd_dmg * nd[tAntigo][x][y]
+            dmt[tAtual][x][y] = ( (b_dmg * b[tAntigo][x][y] + nd_dmg * nd[tAntigo][x][y])*(1 - dmt[tAntigo][x][y])
             - gamma_dmg * (mr[tAntigo][x][y] + ma[tAntigo][x][y])
             )*deltaT + dmt[tAntigo][x][y];
 
