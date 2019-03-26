@@ -1068,7 +1068,7 @@ int main(int argc, char* argv[])
         //Criar para MR, MA, DMT, TO, ND - Gravar em um arquivo
         totalBacterias = 0;
         totalNeutrofilos = 0;
-        #pragma omp parallel for num_threads(4) private(x,y,b_,f_,n_,fib_,nd_,to_,mr_,ma_)
+        #pragma omp parallel for num_threads(4) private(x,y,b_,f_,n_,fib_,nd_,to_,mr_,ma_,newb)
         for (x=0; x < size_; x++)
         {
           for (y=0; y < size_; y++)
@@ -1095,7 +1095,8 @@ int main(int argc, char* argv[])
             mr_ = mr[tAntigo][x][y];
             ma_ = ma[tAntigo][x][y];
 
-            newb = (((r_b - l*n_ - lmr*mr_ - lma*ma_)*b_)* gwb[tAntigo][x][y] + D_b*localAverage(b,x,y,wbdif,tAntigo)
+            b[tAtual][x][y] = (((r_b - l*n[tAntigo][x][y]
+                - lmr*mr[tAntigo][x][y] - lma*ma[tAntigo][x][y])*b[tAntigo][x][y])* gwb[tAntigo][x][y] + D_b*localAverage(b,x,y,wbdif,tAntigo)
             )*deltaT + b[tAntigo][x][y];
             b[tAtual][x][y] = verifyDensity(b[tAtual][x][y]);
 
