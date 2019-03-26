@@ -1068,7 +1068,7 @@ int main(int argc, char* argv[])
         //Criar para MR, MA, DMT, TO, ND - Gravar em um arquivo
         totalBacterias = 0;
         totalNeutrofilos = 0;
-        #pragma omp parallel for num_threads(4) private(x,y)
+        #pragma omp parallel for num_threads(4) private(x,y,b_,f_,n_,fib_,nd_,to_,mr_,ma_)
         for (x=0; x < size_; x++)
         {
           for (y=0; y < size_; y++)
