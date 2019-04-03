@@ -154,7 +154,7 @@ float wdn_dif = 0;
 
 //Migration due to inflammation
 float s_inf = 0;
-
+float s_infmr = 0;
 
 float verifyMaxDensity(float value)
 {
@@ -828,6 +828,8 @@ int main(int argc, char* argv[])
     gamma_dmg = hash_entry_temp->value;
     hashmap_get(pmap, "s_inf", (void**)(&hash_entry_temp));
     s_inf = hash_entry_temp->value;
+    hashmap_get(pmap, "s_infmr", (void**)(&hash_entry_temp));
+    s_infmr = hash_entry_temp->value;
 
     int interval = (int)T/numIteracoesGravadas;
     printf("Size: %d\n", size_);
@@ -1085,18 +1087,19 @@ int main(int argc, char* argv[])
             //+ D2_b*flocalAverage((float***)b,x,y,(float***)wbdif,tAntigo,(float***)b,b_kdif,b_nexp)
             //)*deltaT + b[tAntigo][x][y];
 
-            b_ = b[tAntigo][x][y];
-            f_ = f[tAntigo][x][y];
-            n_ = n[tAntigo][x][y];
-            fib_ = fib[tAntigo][x][y];
-            to_ = to[tAntigo][x][y];
-            nd_ = nd[tAntigo][x][y];
-            //dmt_ = dmt[tAntigo][x][y];
-            mr_ = mr[tAntigo][x][y];
-            ma_ = ma[tAntigo][x][y];
+            // b_ = b[tAntigo][x][y];
+            // f_ = f[tAntigo][x][y];
+            // n_ = n[tAntigo][x][y];
+            // fib_ = fib[tAntigo][x][y];
+            // to_ = to[tAntigo][x][y];
+            // nd_ = nd[tAntigo][x][y];
+            // //dmt_ = dmt[tAntigo][x][y];
+            // mr_ = mr[tAntigo][x][y];
+            // ma_ = ma[tAntigo][x][y];
 
             b[tAtual][x][y] = (((r_b - l*n[tAntigo][x][y]
-                - lmr*mr[tAntigo][x][y] - lma*ma[tAntigo][x][y])*b[tAntigo][x][y])* gwb[tAntigo][x][y] + D_b*localAverage(b,x,y,wbdif,tAntigo)
+                - lmr*mr[tAntigo][x][y] - lma*ma[tAntigo][x][y])*b[tAntigo][x][y])* gwb[tAntigo][x][y]
+                + D_b*localAverage(b,x,y,wbdif,tAntigo)
             )*deltaT + b[tAntigo][x][y];
             b[tAtual][x][y] = verifyDensity(b[tAtual][x][y]);
 
@@ -1132,7 +1135,7 @@ int main(int argc, char* argv[])
             )*deltaT + to[tAntigo][x][y];
             //*(1 - to[tAntigo][x])
 //---
-            mr[tAtual][x][y] = (s_inf*mr[tAntigo][x][y]*dmt[tAntigo][x][y]*gwmr[tAntigo][x][y] + (smr - lmr)*b[tAntigo][x][y]*mr[tAntigo][x][y]*gwmr[tAntigo][x][y]
+            mr[tAtual][x][y] = (s_infmr*mr[tAntigo][x][y]*dmt[tAntigo][x][y]*gwmr[tAntigo][x][y] + (smr - lmr)*b[tAntigo][x][y]*mr[tAntigo][x][y]*gwmr[tAntigo][x][y]
             - alpha*to[tAntigo][x][y]*mr[tAntigo][x][y]
              + D_mr*localAverage(mr,x,y,wmrdif,tAntigo)
              - X_mr*chemotaxis((float***)mr, (float***)b, x, y, (float***)wmrdif, tAntigo))*deltaT + mr[tAntigo][x][y];
