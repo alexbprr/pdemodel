@@ -1,0 +1,48 @@
+Cenário 1 (Bactéria e neutrófilos necrosados causam pouco dano):
+Valores pequenos para b_dmg e nd_dmg;
+Diminuir gammadmg;
+Diminuir sinf;
+Diminuir gammand;
+
+Cenário 2 (Bactéria e neutrófilos necrosados causam muito dano):
+Valores grandes para b_dmg e nd_dmg; 
+Diminuir gammadmg;
+Diminuir sinf;
+Diminuir gammand;
+
+Cenário 3 (Depleção dos neutrófilos no cenário padrão):
+Diminuir s;
+Diminuir sinf;
+
+Cenário 4 (Depleção dos neutrófilos no cenário 2):
+Valores grandes para b_dmg e nd_dmg; 
+Diminuir gammadmg;
+Diminuir sinf;
+Diminuir gammand;
+Diminuir s;
+Diminuir sinf;
+
+Cenário 5 (Depleção de neutrófilos e macrófagos no cenário padrão):
+Diminuir s;
+Diminuir sinf;
+Diminuir smr;
+
+Cenário 6 (Depleção de neutrófilos e macrófagos no cenário 2):
+Valores grandes para b_dmg e nd_dmg; 
+Diminuir gammadmg;
+Diminuir sinf;
+Diminuir gammand;
+Diminuir s;
+Diminuir sinf;
+Diminuir smr;
+
+--------Cenários futuros---------
+
+Cenário 7 (Considerar que a produção de fibrina e toxina dependem de n)
+
+Parâmetros para o cenário padrão: 
+
+
+
+
+
