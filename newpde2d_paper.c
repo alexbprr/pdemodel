@@ -63,7 +63,6 @@ float D_n = 0.;
 float X_n = 0.;
 float s2 = 0.;
 float s3 = 0.;
-float alpha = 0.;
 
 //Toxin parameters
 float betato = 0.;
@@ -697,8 +696,6 @@ int main(int argc, char* argv[])
     D_n = hash_entry_temp->value;
     hashmap_get(pmap, "X_n", (void**)(&hash_entry_temp));
     X_n = hash_entry_temp->value;
-    hashmap_get(pmap, "alpha", (void**)(&hash_entry_temp));
-    alpha = hash_entry_temp->value;
     hashmap_get(pmap, "betato", (void**)(&hash_entry_temp));
     betato = hash_entry_temp->value;
     hashmap_get(pmap, "alphato", (void**)(&hash_entry_temp));
@@ -1104,7 +1101,7 @@ int main(int argc, char* argv[])
             b[tAtual][x][y] = verifyDensity(b[tAtual][x][y]);
 
             //Coa/vWbp pde
-            f[tAtual][x][y] = ( k*b[tAntigo][x][y]*gwf[tAntigo][x][y]    //k*f[tAntigo][x][y]*b[tAntigo][x][y]*(1 - f[tAntigo][x][y]) - p*f[tAntigo][x][y]*b[tAntigo][x][y]*gwfib[tAntigo][x][y] //*gwf[tAntigo][x][y]   //((1 + b_kdif)*pow(b[tAntigo][x][y],b_nexp)/(b_kdif + pow(b[tAntigo][x][y],b_nexp)))*gwf[tAntigo][x][y]    //*b[tAntigo][x][y]*gwf[tAntigo][x][y]
+            f[tAtual][x][y] = ( k*b[tAntigo][x][y]*n[tAntigo][x][y]*gwf[tAntigo][x][y]    //k*f[tAntigo][x][y]*b[tAntigo][x][y]*(1 - f[tAntigo][x][y]) - p*f[tAntigo][x][y]*b[tAntigo][x][y]*gwfib[tAntigo][x][y] //*gwf[tAntigo][x][y]   //((1 + b_kdif)*pow(b[tAntigo][x][y],b_nexp)/(b_kdif + pow(b[tAntigo][x][y],b_nexp)))*gwf[tAntigo][x][y]    //*b[tAntigo][x][y]*gwf[tAntigo][x][y]
             - m_f*f[tAntigo][x][y]
             + D_f*localAverage((float***)f,x,y,(float***)wfdif,tAntigo)
             + D2_f*flocalAverage((float***)f,x,y,(float***)wfdif,tAntigo,(float***)b,f_kdif,f_nexp)
@@ -1119,35 +1116,36 @@ int main(int argc, char* argv[])
 
             //Neutrophil PDE
            // n[tAtual][x][y] =  ( (s*b[tAntigo][x][y]*n[tAntigo][x][y] + s2*b[tAntigo][x][y]+ s3)*gwn[tAntigo][x][y]
-           // - m_n*n[tAntigo][x][y] - alphato*to[tAntigo][x][y]*n[tAntigo][x][y] -alpha*b[tAntigo][x][y]*n[tAntigo][x][y]
+           // - m_n*n[tAntigo][x][y] - alphato*to[tAntigo][x][y]*n[tAntigo][x][y] -alphato*b[tAntigo][x][y]*n[tAntigo][x][y]
            // + D_n*localAverage((float***)n,x,y,(float***)wndif,tAntigo)
             //- X_n*chemotaxis((float***)n, (float***)b, x, y, (float***)wndif, tAntigo)
            // )*deltaT + n[tAntigo][x][y];
 
-            n[tAtual][x][y] = (s_inf*n[tAntigo][x][y]*dmt[tAntigo][x][y]*gwn[tAntigo][x][y] + s*ma[tAntigo][x][y]*gwn[tAntigo][x][y] - alpha*to[tAntigo][x][y]*n[tAntigo][x][y]
+            n[tAtual][x][y] = (s_inf*n[tAntigo][x][y]*dmt[tAntigo][x][y]*gwn[tAntigo][x][y]
+                + s*ma[tAntigo][x][y]*gwn[tAntigo][x][y] - alphato*to[tAntigo][x][y]*n[tAntigo][x][y]
                 - m_n*n[tAntigo][x][y]
             + D_n*localAverage(n,x,y,wndif,tAntigo)- X_n*chemotaxis((float***)n, (float***)b, x, y, (float***)wndif, tAntigo)
             )*deltaT + n[tAntigo][x][y];
             n[tAtual][x][y] = verifyDensity(n[tAtual][x][y]);
 
-            to[tAtual][x][y] = (betato*b[tAntigo][x][y]*gwto[tAntigo][x][y] - m_to*to[tAntigo][x][y]
+            to[tAtual][x][y] = (betato*b[tAntigo][x][y]*n[tAntigo][x][y]*gwto[tAntigo][x][y] - m_to*to[tAntigo][x][y]
               + D_to*diffusion((float***)to,x,y,tAntigo)
             )*deltaT + to[tAntigo][x][y];
             //*(1 - to[tAntigo][x])
 //---
             mr[tAtual][x][y] = (s_infmr*mr[tAntigo][x][y]*dmt[tAntigo][x][y]*gwmr[tAntigo][x][y] + (smr - lmr)*b[tAntigo][x][y]*mr[tAntigo][x][y]*gwmr[tAntigo][x][y]
-            - alpha*to[tAntigo][x][y]*mr[tAntigo][x][y]
+            - alphato*to[tAntigo][x][y]*mr[tAntigo][x][y]
              + D_mr*localAverage(mr,x,y,wmrdif,tAntigo)
              - X_mr*chemotaxis((float***)mr, (float***)b, x, y, (float***)wmrdif, tAntigo))*deltaT + mr[tAntigo][x][y];
             mr[tAtual][x][y] = verifyDensity(mr[tAtual][x][y]);
 
             //Ajustar taxas de fagocitose. Estudar efeito toxina
 
-            ma[tAtual][x][y] = (lmr*mr[tAntigo][x][y]*b[tAntigo][x][y]*gwmr[tAntigo][x][y] - alpha*to[tAntigo][x][y]*ma[tAntigo][x][y]
+            ma[tAtual][x][y] = (lmr*mr[tAntigo][x][y]*b[tAntigo][x][y]*gwmr[tAntigo][x][y] - alphato*to[tAntigo][x][y]*ma[tAntigo][x][y]
              + D_ma*localAverage(ma,x,y,wmadif,tAntigo)
              - X_ma*chemotaxis((float***)ma, (float***)b, x, y, (float***)wmadif, tAntigo))*deltaT + ma[tAntigo][x][y];
             //alterar B[t][x][y] = (r*B - ln*N*B - lmr*MR*B - lma*MA*B) * GB(WB) + D_B*localAverage(B,x,y,wbdif,tAntigo);
-            //alterar N[t][x][y] = B2*MA*GN(WN) - alpha*to*N + Dn*localAverage(N,x,y,wndif,tAntigo);
+            //alterar N[t][x][y] = B2*MA*GN(WN) - alphato*to*N + Dn*localAverage(N,x,y,wndif,tAntigo);
             ma[tAtual][x][y] = verifyDensity(ma[tAtual][x][y]);
 
 /* //--            nd[tAtual][x][y] = (
