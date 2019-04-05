@@ -17,12 +17,12 @@ typedef struct data_struct_s
 
 map_t pmap; //Map parameter name to its value
 
+int numItersRec = 0;
 float deltaT  = 0.;
 float days = 0;
 int T = 0;
 float deltaY = 0.;
 float deltaX = 0.;
-//#define size_ (int)(10/deltaX) + 1
 int size_  = 0;
 float maxDensity = 0;
 
@@ -145,9 +145,9 @@ float D_ma = 0;
 float lma = 0;
 float X_ma = 0;
 //damage tissue
-float b_dmg = 0;
-float nd_dmg = 0;
-float gamma_dmg = 0;
+float b_dmt = 0;
+float nd_dmt = 0;
+float gamma_dmt = 0;
 float wdn = 0;
 float wdn_dif = 0;
 
@@ -229,6 +229,12 @@ void imprimeDados(FILE* arq, float*** u, int tAtual)
     }
     fprintf(arq,"--");//A cada vez que imprimeDados é chamada, o separador -- é gravado após a matriz do tempo atual
     fprintf(arq,"\n");
+}
+
+void imprimeTotal(FILE* arq, float total)
+{
+    for (int i = 0; i < numItersRec; i++)
+        fprintf(arq,"%f\n", total);
 }
 
 float chemotaxis(float*** u, float ***ch, int x, int y, float*** w, int tAntigo)
@@ -465,7 +471,6 @@ void updateGWReaction(float*** b, float*** f, float*** n, float*** fib, float***
 
 }
 
-
 void updateWDiffusion(float*** b, float*** f, float*** n, float*** fib, float*** wbdif, float*** wfdif, float*** wndif, float*** wfibdif,
   float*** to, float*** wtodif, float*** wmrdif, float*** wmadif, float*** dmt, int x, int y, int t)
 {
@@ -632,7 +637,6 @@ void readAndSetInitialCondition(FILE* fp, float ***b, float ***f, float ***fib, 
 int main(int argc, char* argv[])
 {
     int x=0, y=0, t=0, i=0, j=0;
-    int numIteracoesGravadas = 10;
     FILE* entryfile;
     if ((entryfile = fopen(argv[1],"r")) == NULL)
     {
@@ -643,11 +647,11 @@ int main(int argc, char* argv[])
     data_struct_t* hash_entry_temp = malloc(sizeof(data_struct_t));
     hashmap_get(pmap, "deltaT", (void**)(&hash_entry_temp));
     deltaT = hash_entry_temp->value;
+    hashmap_get(pmap, "numItersRec", (void**)(&hash_entry_temp));
+    numItersRec = hash_entry_temp->value;
     hashmap_get(pmap, "days", (void**)(&hash_entry_temp));
     days = hash_entry_temp->value;
     T = (float)days*((float)(1./deltaT));
-    hashmap_get(pmap, "days", (void**)(&hash_entry_temp));
-    days = hash_entry_temp->value;
     hashmap_get(pmap, "deltaX", (void**)(&hash_entry_temp));
     deltaX = hash_entry_temp->value;
     hashmap_get(pmap, "deltaY", (void**)(&hash_entry_temp));
@@ -817,26 +821,26 @@ int main(int argc, char* argv[])
     wdn = hash_entry_temp->value;
     hashmap_get(pmap, "wdn_dif", (void**)(&hash_entry_temp));
     wdn_dif = hash_entry_temp->value;
-    hashmap_get(pmap, "b_dmg", (void**)(&hash_entry_temp));
-    b_dmg = hash_entry_temp->value;
-    hashmap_get(pmap, "nd_dmg", (void**)(&hash_entry_temp));
-    nd_dmg = hash_entry_temp->value;
-    hashmap_get(pmap, "gamma_dmg", (void**)(&hash_entry_temp));
-    gamma_dmg = hash_entry_temp->value;
+    hashmap_get(pmap, "b_dmt", (void**)(&hash_entry_temp));
+    b_dmt = hash_entry_temp->value;
+    hashmap_get(pmap, "nd_dmt", (void**)(&hash_entry_temp));
+    nd_dmt = hash_entry_temp->value;
+    hashmap_get(pmap, "gamma_dmt", (void**)(&hash_entry_temp));
+    gamma_dmt = hash_entry_temp->value;
     hashmap_get(pmap, "s_inf", (void**)(&hash_entry_temp));
     s_inf = hash_entry_temp->value;
     hashmap_get(pmap, "s_infmr", (void**)(&hash_entry_temp));
     s_infmr = hash_entry_temp->value;
 
-    int interval = (int)T/numIteracoesGravadas;
+    int interval = (int)T/numItersRec;
     printf("Size: %d\n", size_);
     printf("Interval: %d\n", interval);
 
     float ***b = (float***)malloc(2*sizeof(float**)); // bacteria
     float ***f = (float***)malloc(2*sizeof(float**));
-    float ***n = (float***)malloc(2*sizeof(float**));
     float ***fib = (float***)malloc(2*sizeof(float**));
     float ***to = (float***)malloc(2*sizeof(float**));
+    float ***n = (float***)malloc(2*sizeof(float**));
     float ***nd = (float***)malloc(2*sizeof(float**));
     float ***mr = (float***)malloc(2*sizeof(float**));
     float ***ma = (float***)malloc(2*sizeof(float**));
@@ -844,29 +848,26 @@ int main(int argc, char* argv[])
 
     float ***wb = (float***)malloc(2*sizeof(float**));
     float ***wf = (float***)malloc(2*sizeof(float**));
-    float ***wn = (float***)malloc(2*sizeof(float**));
     float ***wfib = (float***)malloc(2*sizeof(float**));
     float ***wto = (float***)malloc(2*sizeof(float**));
+    float ***wn = (float***)malloc(2*sizeof(float**));
+    float ***wmr = (float***)malloc(2*sizeof(float**));
+    float ***wma = (float***)malloc(2*sizeof(float**));
 
     float ***wbdif = (float***)malloc(2*sizeof(float**));
     float ***wfdif = (float***)malloc(2*sizeof(float**));
-    float ***wndif = (float***)malloc(2*sizeof(float**));
     float ***wfibdif = (float***)malloc(2*sizeof(float**));
     float ***wtodif = (float***)malloc(2*sizeof(float**));
+    float ***wndif = (float***)malloc(2*sizeof(float**));
+    float ***wmrdif = (float***)malloc(2*sizeof(float**));
+    float ***wmadif = (float***)malloc(2*sizeof(float**));
 
     float ***gwb = (float***)malloc(2*sizeof(float**));
     float ***gwf = (float***)malloc(2*sizeof(float**));
-    float ***gwn = (float***)malloc(2*sizeof(float**));
     float ***gwfib = (float***)malloc(2*sizeof(float**));
     float ***gwto = (float***)malloc(2*sizeof(float**));
-
-    float ***gwone = (float***)malloc(2*sizeof(float**));
-
-    float ***wmrdif = (float***)malloc(2*sizeof(float**));
-    float ***wmadif = (float***)malloc(2*sizeof(float**));
-    float ***wmr = (float***)malloc(2*sizeof(float**));
+    float ***gwn = (float***)malloc(2*sizeof(float**));
     float ***gwmr = (float***)malloc(2*sizeof(float**));
-    float ***wma = (float***)malloc(2*sizeof(float**));
     float ***gwma = (float***)malloc(2*sizeof(float**));
 
     for(t=0; t < 2; t++)
@@ -898,8 +899,6 @@ int main(int argc, char* argv[])
         gwn[t] = (float**)malloc(size_*sizeof(float*));
         gwfib[t] = (float**)malloc(size_*sizeof(float*));
         gwto[t] = (float**)malloc(size_*sizeof(float*));
-
-        gwone[t] = (float**)malloc(size_*sizeof(float*));
 //----
         wmrdif[t] = (float**)malloc(size_*sizeof(float*));
         wmadif[t] = (float**)malloc(size_*sizeof(float*));
@@ -920,7 +919,6 @@ int main(int argc, char* argv[])
           ma[t][x] = (float*)malloc(size_*sizeof(float));
           dmt[t][x] = (float*)malloc(size_*sizeof(float));
 
-
           wb[t][x] = (float*)malloc(size_*sizeof(float));
           wf[t][x] = (float*)malloc(size_*sizeof(float));
           wn[t][x] = (float*)malloc(size_*sizeof(float));
@@ -939,8 +937,6 @@ int main(int argc, char* argv[])
           gwfib[t][x] = (float*)malloc(size_*sizeof(float));
           gwto[t][x] = (float*)malloc(size_*sizeof(float));
 
-          gwone[t][x] = (float*)malloc(size_*sizeof(float));
-
           wmrdif[t][x] = (float*)malloc(size_*sizeof(float));
           wmadif[t][x] = (float*)malloc(size_*sizeof(float));
           wmr[t][x] = (float*)malloc(size_*sizeof(float));
@@ -949,22 +945,23 @@ int main(int argc, char* argv[])
           gwma[t][x] = (float*)malloc(size_*sizeof(float));
 
           for(y=0; y < size_; y++)
-            gwone[t][x][y] = 1;
-            b[t][x][y] =  0;
-            f[t][x][y] =  0;
-            n[t][x][y] =  0;
-            mr[t][x][y] = 0;
-            ma[t][x][y] = 0;
-            fib[t][x][y] = 0.;
-            to[t][x][y] = 0.;
-            nd[t][x][y] = 0.;
-            dmt[t][x][y] = 0.;
-            wmrdif[t][x][y] = 0;
-            wmadif[t][x][y] = 0;
-            wmr[t][x][y] = 0;
-            gwmr[t][x][y] = 0;
-            wma[t][x][y] = 0;
-            gwma[t][x][y] = 0;
+          {
+              b[t][x][y] =  0;
+              f[t][x][y] =  0;
+              n[t][x][y] =  0;
+              mr[t][x][y] = 0;
+              ma[t][x][y] = 0;
+              fib[t][x][y] = 0.;
+              to[t][x][y] = 0.;
+              nd[t][x][y] = 0.;
+              dmt[t][x][y] = 0.;
+              wmrdif[t][x][y] = 0;
+              wmadif[t][x][y] = 0;
+              wmr[t][x][y] = 0;
+              gwmr[t][x][y] = 0;
+              wma[t][x][y] = 0;
+              gwma[t][x][y] = 0;
+          }
         }
     }
 //----
@@ -1010,17 +1007,16 @@ int main(int argc, char* argv[])
     FILE* mafile = fopen("ma.dat", "w");
     FILE* dmt_file = fopen("dmt.dat", "w");
 
+    FILE* totalb_file = fopen("totalb.dat", "w");
+    FILE* totaln_file = fopen("totaln.dat", "w");
+    FILE* totalnd_file = fopen("totalnd.dat", "w");
+    FILE* totalmr_file = fopen("totalmr.dat", "w");
+    FILE* totalma_file = fopen("totalma.dat", "w");
+
     int tAntigo = 0;
     int tAtual = 1;
-    int totalBacterias = 0, totalNeutrofilos = 0;
-
-    // for(x=0; x < size_; x++)
-    // {
-    //   for(y=0; y < size_; y++)
-    //   {
-    //
-    //   }
-    // }
+    int totalB = 0, totalN = 0, totalND = 0, totalMR = 0, totalMA = 0, totalCoa = 0,
+        totalFib = 0, totalTO = 0, totalDMT = 0;
 
     fseek(entryfile,0,SEEK_SET);
     readAndSetInitialCondition(entryfile,(float***)b,(float***)f,(float***)fib,(float***)n,(float***)mr,(float***)ma,tAntigo);
@@ -1028,8 +1024,15 @@ int main(int argc, char* argv[])
     {
       for(y=0; y < size_; y++)
       {
-        totalBacterias += b[tAntigo][x][y];
-        totalNeutrofilos += n[tAntigo][x][y];
+        totalB += b[tAntigo][x][y];
+        totalN += n[tAntigo][x][y];
+        totalND += nd[tAntigo][x][y];
+        totalCoa += f[tAntigo][x][y];
+        totalFib += fib[tAntigo][x][y];
+        totalMR += mr[tAntigo][x][y];
+        totalMA += ma[tAntigo][x][y];
+        totalTO += to[tAntigo][x][y];
+        totalDMT += dmt[tAntigo][x][y];
 
         updateGWReaction((float***)b,(float***)f,(float***)n,(float***)fib,(float***)wb,(float***)wf,(float***)wn,(float***)wfib,
             (float***)gwb,(float***)gwf,(float***)gwn,(float***)gwfib,(float***)to, (float***)wto,(float***)gwto,(float***)wmr,
@@ -1047,6 +1050,11 @@ int main(int argc, char* argv[])
     imprimeDados(mrfile,(float***)mr,tAntigo);
     imprimeDados(mafile,(float***)ma,tAntigo);
     imprimeDados(dmt_file,(float***)dmt,tAntigo);
+    fprintf(totalb_file,"%f\n", totalB);
+    fprintf(totaln_file,"%f\n", totalN);
+    fprintf(totalnd_file,"%f\n", totalND);
+    fprintf(totalmr_file,"%f\n", totalMR);
+    fprintf(totalma_file,"%f\n", totalMA);
 
     float b_, f_, n_, fib_, to_, nd_, mr_, ma_, d_;
     float gwb_, gwf_, gwfib_, gwn_, gwmr_, gwma_;
@@ -1064,36 +1072,25 @@ int main(int argc, char* argv[])
             tAtual = 1;
             tAntigo = 0;
         }
-        //Criar para MR, MA, DMT, TO, ND - Gravar em um arquivo
-        totalBacterias = 0;
-        totalNeutrofilos = 0;
+
         #pragma omp parallel for num_threads(4) private(x,y,b_,f_,n_,fib_,nd_,to_,mr_,ma_,newb)
         for (x=0; x < size_; x++)
         {
           for (y=0; y < size_; y++)
           {
 
-              #pragma omp critital
-              {
-                  totalBacterias += b[tAtual][x][y];
-                  totalNeutrofilos += n[tAtual][x][y];
-              }
-            //Bacteria pde
-            //b[tAtual][x][y] = ( (r_b - l*n[tAntigo][x][y])*b[tAntigo][x][y]*gwb[tAntigo][x][y] //- l*n[tAntigo][x][y]*b[tAntigo][x][y]*gwn[tAntigo][x][y]
-            //+ D_b*localAverage((float***)b,x,y,(float***)wbdif,tAntigo)
-            //+ D2_b*flocalAverage((float***)b,x,y,(float***)wbdif,tAntigo,(float***)b,b_kdif,b_nexp)
-            //)*deltaT + b[tAntigo][x][y];
-
-            // b_ = b[tAntigo][x][y];
-            // f_ = f[tAntigo][x][y];
-            // n_ = n[tAntigo][x][y];
-            // fib_ = fib[tAntigo][x][y];
-            // to_ = to[tAntigo][x][y];
-            // nd_ = nd[tAntigo][x][y];
-            // //dmt_ = dmt[tAntigo][x][y];
-            // mr_ = mr[tAntigo][x][y];
-            // ma_ = ma[tAntigo][x][y];
-
+             #pragma omp critital
+             {
+                  totalB += b[tAtual][x][y];
+                  totalN += n[tAtual][x][y];
+                  totalND += nd[tAtual][x][y];
+                  totalCoa += f[tAtual][x][y];
+                  totalFib += fib[tAtual][x][y];
+                  totalMR += mr[tAtual][x][y];
+                  totalMA += ma[tAtual][x][y];
+                  totalTO += to[tAtual][x][y];
+                  totalDMT += dmt[tAtual][x][y];
+            }
             b[tAtual][x][y] = (((r_b - l*n[tAntigo][x][y]
                 - lmr*mr[tAntigo][x][y] - lma*ma[tAntigo][x][y])*b[tAntigo][x][y])* gwb[tAntigo][x][y]
                 + D_b*localAverage(b,x,y,wbdif,tAntigo)
@@ -1163,8 +1160,8 @@ int main(int argc, char* argv[])
 
             nd[tAtual][x][y] = verifyDensity(nd[tAtual][x][y]);
 
-            dmt[tAtual][x][y] = ( (b_dmg * b[tAntigo][x][y] + nd_dmg * nd[tAntigo][x][y])*(1 - dmt[tAntigo][x][y])
-            - gamma_dmg * (mr[tAntigo][x][y] + ma[tAntigo][x][y])
+            dmt[tAtual][x][y] = ( (b_dmt * b[tAntigo][x][y] + nd_dmt * nd[tAntigo][x][y])*(1 - dmt[tAntigo][x][y])
+            - gamma_dmt * (mr[tAntigo][x][y] + ma[tAntigo][x][y])
             )*deltaT + dmt[tAntigo][x][y];
 
             updateGWReaction((float***)b,(float***)f,(float***)n,(float***)fib,(float***)wb,(float***)wf,(float***)wn,(float***)wfib,
@@ -1185,12 +1182,12 @@ int main(int argc, char* argv[])
             imprimeDados(mrfile,(float***)mr,tAtual);
             imprimeDados(mafile,(float***)ma,tAtual);
             imprimeDados(dmt_file,(float***)dmt,tAtual);
-            // fflush(bfile);
-            // fflush(ffile);
-            // fflush(nfile);
-            // fflush(fibfile);
-            // fflush(tofile);
-            // fflush(ndfile);
+            fprintf(totalb_file,"%d\n", totalB);
+            fprintf(totalb_file,"%d\n", totalB);
+            fprintf(totaln_file,"%d\n", totalN);
+            fprintf(totalnd_file,"%d\n", totalND);
+            fprintf(totalmr_file,"%d\n", totalMR);
+            fprintf(totalma_file,"%d\n", totalMA);
         }
     }
     for(t=0; t < 2; t++)
@@ -1300,6 +1297,11 @@ int main(int argc, char* argv[])
     fclose(mrfile);
     fclose(mafile);
     fclose(dmt_file);
+    fclose(totalb_file);
+    fclose(totaln_file);
+    fclose(totalnd_file);
+    fclose(totalmr_file);
+    fclose(totalma_file);
 
     hashmap_free(pmap);
 
