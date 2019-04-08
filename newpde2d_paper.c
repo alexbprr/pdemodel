@@ -1135,7 +1135,7 @@ int main(int argc, char* argv[])
              + D_mr*localAverage(mr,x,y,wmrdif,tAntigo)
              - X_mr*chemotaxis((float***)mr, (float***)b, x, y, (float***)wmrdif, tAntigo))*deltaT + mr[tAntigo][x][y];
             mr[tAtual][x][y] = verifyDensity(mr[tAtual][x][y]);
-
+            mr[tAtual][x][y] = verifyMaxDensity(mr[tAtual][x][y]);
             //Ajustar taxas de fagocitose. Estudar efeito toxina
 
             ma[tAtual][x][y] = (lmr*mr[tAntigo][x][y]*b[tAntigo][x][y]*gwmr[tAntigo][x][y] - alphato*to[tAntigo][x][y]*ma[tAntigo][x][y]
