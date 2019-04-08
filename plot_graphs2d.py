@@ -17,7 +17,6 @@ import matplotlib.colors as colors
 import matplotlib.cm as cmx
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.pyplot import imshow
-from scipy.interpolate import interp2d
 
 def getMatrixFromFile(filename, u):
     try:
