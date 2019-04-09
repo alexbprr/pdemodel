@@ -505,15 +505,11 @@ void readAndSetParameters(FILE* fp)
   //while (fscanf(fp, "%m[^=]=%ms", &key, &value) == 2) {
   while ((fgets (c, sizeof(c), fp)) != NULL)
   {
-    printf("%s\n", c);
     sds line = sdsnew(c);
     sdstrim(line, " ");
-    printf("%s\n", line);
     if (sdscmp(line,sdsnew("--\n")) == 0)
         break;
     tokens = sdssplitlen(line,sdslen(line),"=",1,&count);
-    //printf("key: %s\n", tokens[0]);
-    //printf("value: %s\n", tokens[1]);
     fflush(stdout);
     hash_entry = malloc(sizeof(data_struct_t));
     sprintf(hash_entry->key_string,"%s",tokens[0]);
@@ -533,7 +529,6 @@ void readAndSetInitialCondition(FILE* fp, float ***b, float ***f, float ***fib, 
   float value;
   while ((fgets (c, sizeof(c), fp)) != NULL)
   {
-    printf("%s\n", c);
     sds line = sdsnew(c);
     sdstrim(line, " ");
     //tokens = sdssplitlen(line,sdslen(line),"\n",1,&count);
@@ -651,7 +646,6 @@ int main(int argc, char* argv[])
     numItersRec = hash_entry_temp->value;
     hashmap_get(pmap, "days", (void**)(&hash_entry_temp));
     days = hash_entry_temp->value;
-    T = (float)days*((float)(1./deltaT));
     hashmap_get(pmap, "deltaX", (void**)(&hash_entry_temp));
     deltaX = hash_entry_temp->value;
     hashmap_get(pmap, "deltaY", (void**)(&hash_entry_temp));
@@ -832,6 +826,7 @@ int main(int argc, char* argv[])
     hashmap_get(pmap, "s_infmr", (void**)(&hash_entry_temp));
     s_infmr = hash_entry_temp->value;
 
+    T = (float)days*((float)(1./deltaT));
     int interval = (int)T/numItersRec;
     printf("Size: %d\n", size_);
     printf("Interval: %d\n", interval);
@@ -1015,7 +1010,7 @@ int main(int argc, char* argv[])
 
     int tAntigo = 0;
     int tAtual = 1;
-    int totalB = 0, totalN = 0, totalND = 0, totalMR = 0, totalMA = 0, totalCoa = 0,
+    float totalB = 0, totalN = 0, totalND = 0, totalMR = 0, totalMA = 0, totalCoa = 0,
         totalFib = 0, totalTO = 0, totalDMT = 0;
 
     fseek(entryfile,0,SEEK_SET);
@@ -1079,7 +1074,7 @@ int main(int argc, char* argv[])
           for (y=0; y < size_; y++)
           {
 
-             #pragma omp critital
+             #pragma omp critical
              {
                   totalB += b[tAtual][x][y];
                   totalN += n[tAtual][x][y];
@@ -1182,12 +1177,11 @@ int main(int argc, char* argv[])
             imprimeDados(mrfile,(float***)mr,tAtual);
             imprimeDados(mafile,(float***)ma,tAtual);
             imprimeDados(dmt_file,(float***)dmt,tAtual);
-            fprintf(totalb_file,"%d\n", totalB);
-            fprintf(totalb_file,"%d\n", totalB);
-            fprintf(totaln_file,"%d\n", totalN);
-            fprintf(totalnd_file,"%d\n", totalND);
-            fprintf(totalmr_file,"%d\n", totalMR);
-            fprintf(totalma_file,"%d\n", totalMA);
+            fprintf(totalb_file,"%f\n", totalB);
+            fprintf(totaln_file,"%f\n", totalN);
+            fprintf(totalnd_file,"%f\n", totalND);
+            fprintf(totalmr_file,"%f\n", totalMR);
+            fprintf(totalma_file,"%f\n", totalMA);
         }
     }
     for(t=0; t < 2; t++)
