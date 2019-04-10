@@ -502,7 +502,6 @@ void readAndSetParameters(FILE* fp)
   char c[100];
   float fvalue;
   pmap = hashmap_new();
-  //while (fscanf(fp, "%m[^=]=%ms", &key, &value) == 2) {
   while ((fgets (c, sizeof(c), fp)) != NULL)
   {
     sds line = sdsnew(c);
@@ -531,10 +530,7 @@ void readAndSetInitialCondition(FILE* fp, float ***b, float ***f, float ***fib, 
   {
     sds line = sdsnew(c);
     sdstrim(line, " ");
-    //tokens = sdssplitlen(line,sdslen(line),"\n",1,&count);
     tokens = sdssplitlen(line,sdslen(line),":",1,&count);
-    //printf("tokens: %s\n", tokens[0]);
-    //printf("count: %d\n", count);
     sds celltype = tokens[0];
     if (count >= 2)
     {
@@ -1045,11 +1041,11 @@ int main(int argc, char* argv[])
     imprimeDados(mrfile,(float***)mr,tAntigo);
     imprimeDados(mafile,(float***)ma,tAntigo);
     imprimeDados(dmt_file,(float***)dmt,tAntigo);
-    fprintf(totalb_file,"%f\n", totalB);
-    fprintf(totaln_file,"%f\n", totalN);
-    fprintf(totalnd_file,"%f\n", totalND);
-    fprintf(totalmr_file,"%f\n", totalMR);
-    fprintf(totalma_file,"%f\n", totalMA);
+    fprintf(totalb_file,"%.2f\n", totalB);
+    fprintf(totaln_file,"%.2f\n", totalN);
+    fprintf(totalnd_file,"%.2f\n", totalND);
+    fprintf(totalmr_file,"%.2f\n", totalMR);
+    fprintf(totalma_file,"%.2f\n", totalMA);
 
     float b_, f_, n_, fib_, to_, nd_, mr_, ma_, d_;
     float gwb_, gwf_, gwfib_, gwn_, gwmr_, gwma_;
@@ -1057,6 +1053,15 @@ int main(int argc, char* argv[])
 
     for(int step = 1; step < T+1; step++)
     {
+        totalB = 0;
+        totalN = 0;
+        totalND = 0;
+        totalCoa = 0;
+        totalFib = 0;
+        totalMR = 0;
+        totalMA = 0;
+        totalTO = 0;
+        totalDMT = 0;
         if(step % 2 == 0)
         {
             tAtual = 0;
@@ -1130,7 +1135,7 @@ int main(int argc, char* argv[])
              + D_mr*localAverage(mr,x,y,wmrdif,tAntigo)
              - X_mr*chemotaxis((float***)mr, (float***)b, x, y, (float***)wmrdif, tAntigo))*deltaT + mr[tAntigo][x][y];
             mr[tAtual][x][y] = verifyDensity(mr[tAtual][x][y]);
-            mr[tAtual][x][y] = verifyMaxDensity(mr[tAtual][x][y]);
+
             //Ajustar taxas de fagocitose. Estudar efeito toxina
 
             ma[tAtual][x][y] = (lmr*mr[tAntigo][x][y]*b[tAntigo][x][y]*gwmr[tAntigo][x][y] - alphato*to[tAntigo][x][y]*ma[tAntigo][x][y]
@@ -1177,11 +1182,11 @@ int main(int argc, char* argv[])
             imprimeDados(mrfile,(float***)mr,tAtual);
             imprimeDados(mafile,(float***)ma,tAtual);
             imprimeDados(dmt_file,(float***)dmt,tAtual);
-            fprintf(totalb_file,"%f\n", totalB);
-            fprintf(totaln_file,"%f\n", totalN);
-            fprintf(totalnd_file,"%f\n", totalND);
-            fprintf(totalmr_file,"%f\n", totalMR);
-            fprintf(totalma_file,"%f\n", totalMA);
+            fprintf(totalb_file,"%.2f\n", totalB);
+            fprintf(totaln_file,"%.2f\n", totalN);
+            fprintf(totalnd_file,"%.2f\n", totalND);
+            fprintf(totalmr_file,"%.2f\n", totalMR);
+            fprintf(totalma_file,"%.2f\n", totalMA);
         }
     }
     for(t=0; t < 2; t++)
